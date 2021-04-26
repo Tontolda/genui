@@ -95,4 +95,3 @@ class MapTestCase(CompoundsMixIn, APITestCase):
         response = self.client.post(create_url, data=post_data, format='json')
         print(json.dumps(response.data, indent=4))
         self.assertGreater(response.status_code, 399)
-
