@@ -33,71 +33,7 @@ class MapTestCase(CompoundsMixIn, APITestCase):
         ]
 
 
-    def test_create_get_map_correct_MDS(self):
-        post_data = {
-            "name": "MDS test",
-            "project": self.project.id,
-            "trainingStrategy": {
-                "algorithm": Algorithm.objects.get(name="MDS").id,
-                "mode": AlgorithmMode.objects.get(name="map").id,
-                "parameters": {
-                    "n_init": 4,
-                },
-                "descriptors": [
-                    DescriptorGroup.objects.get(name="MORGANFP").id
-                ]
-            },
-            "molsets" : [x.id for x in self.molsets]
-        }
-        mol_count = 0
-        for molset in MolSet.objects.filter(id__in=post_data["molsets"]).all():
-            count = molset.molecules.count()
-            mol_count += count
-
-        create_url = reverse('map-list')
-        response = self.client.post(create_url, data=post_data, format='json')
-        print(json.dumps(response.data, indent=4))
-        self.assertEqual(response.status_code, 201)
-
-        mymap = Map.objects.get(pk=response.data["id"])
-
-        points_url = reverse('map-points-list', args=[mymap.id])
-        print(points_url)
-        response = self.client.get(points_url)
-        print(json.dumps(response.data, indent=4))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(mol_count, len(response.data["results"]))
-
-        maps_url = reverse('map-list');
-        map_list_response = self.client.get(maps_url);
-        print(json.dumps(map_list_response.data, indent=4))
-        self.assertEqual(map_list_response.status_code, 200)
-        self.assertEqual(map_list_response.data[0]["name"], "MDS test")
-
-class PCATestCase(CompoundsMixIn, APITestCase):
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.project = self.createProject();
-        self.molsets = [
-            self.createMolSet(
-                reverse('chemblSet-list'),
-                {
-                    "targets": ["CHEMBL251"],
-                    "maxPerTarget": 10
-                }
-            ),
-            self.createMolSet(
-                reverse('chemblSet-list'),
-                {
-                    "targets": ["CHEMBL203"],
-                    "maxPerTarget": 10
-                }
-            ),
-        ]
-
-
-    def test_create_get_map_correct_PCA(self):
+    def test_create_get_map_correct(self):
         post_data = {
             "name": "PCA test",
             "project": self.project.id,
@@ -143,10 +79,6 @@ class PCATestCase(CompoundsMixIn, APITestCase):
         map_response = self.client.get(maps_url)
         print(json.dumps(map_response.data, indent=4))
         self.assertEqual(map_response.status_code, 200)
-<<<<<<< HEAD
-        print(map_response.data["name"])
-=======
->>>>>>> 1150d2947e518f8d5f3a8e0591e9c9dc836e9cf3
         self.assertEqual(map_response.data["name"], "PCA test")
 
 
@@ -163,72 +95,3 @@ class PCATestCase(CompoundsMixIn, APITestCase):
         response = self.client.post(create_url, data=post_data, format='json')
         print(json.dumps(response.data, indent=4))
         self.assertGreater(response.status_code, 399)
-
-class UMAPTestCase(CompoundsMixIn, APITestCase):
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.project = self.createProject();
-        self.molsets = [
-            self.createMolSet(
-                reverse('chemblSet-list'),
-                {
-                    "targets": ["CHEMBL251"],
-                    "maxPerTarget": 10
-                }
-            ),
-            self.createMolSet(
-                reverse('chemblSet-list'),
-                {
-                    "targets": ["CHEMBL203"],
-                    "maxPerTarget": 10
-                }
-            ),
-        ]
-
-    def test_create_get_map_correct_UMAP(self):
-        post_data = {
-            "name": "UMAP test",
-            "project": self.project.id,
-            "trainingStrategy": {
-                "algorithm": Algorithm.objects.get(name="UMAP").id,
-                "mode": AlgorithmMode.objects.get(name="map").id,
-                "parameters": {
-                    "n_neighbors": 15,
-                    "min_dist": 0.5,
-                    "metric": 'euclidean',
-                },
-                "descriptors": [
-                    DescriptorGroup.objects.get(name="MORGANFP").id
-                ]
-            },
-            "molsets" : [x.id for x in self.molsets]
-        }
-        mol_count = 0
-        for molset in MolSet.objects.filter(id__in=post_data["molsets"]).all():
-            count = molset.molecules.count()
-            mol_count += count
-
-        create_url = reverse('map-list')
-        response = self.client.post(create_url, data=post_data, format='json')
-        print(json.dumps(response.data, indent=4))
-        self.assertEqual(response.status_code, 201)
-
-        mymap = Map.objects.get(pk=response.data["id"])
-
-        points_url = reverse('map-points-list', args=[mymap.id])
-        print(points_url)
-        response = self.client.get(points_url)
-        print(json.dumps(response.data, indent=4))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(mol_count, len(response.data["results"]))
-
-        maps_url = reverse('map-list');
-        map_list_response = self.client.get(maps_url);
-        print(json.dumps(map_list_response.data, indent=4))
-        self.assertEqual(map_list_response.status_code, 200)
-        self.assertEqual(map_list_response.data[0]["name"], "UMAP test")
-
-
-
-
